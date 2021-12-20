@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import Webcam from "react-webcam";
 import * as faceapi from "face-api.js"
+import { createCanvasFromMedia } from "face-api.js";
 
 const Webcamtsx = () => {
   const [modelLoading, setModelLoading] = useState<boolean>(true);
@@ -42,20 +43,22 @@ const Webcamtsx = () => {
 	
 
 	const liveFaceDetection = async () => {
-		console.log(streamRef.current.props.width)
 		const displaySize ={
 			width: streamRef.current.width,
-			height: streamRef.current.height
+			height: 600
 		}
 		faceapi.matchDimensions(canvasRef.current, displaySize)
 		setInterval(async () => {
+			const context = canvasRef.current.getContext('2d');
+      context.clearRect(0, 0, displaySize.width, displaySize.height);
+			canvasRef.current.innerHTML = createCanvasFromMedia(streamRef.current)
 			const data:any = await faceapi.detectSingleFace(streamRef.current, 
 			new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
 			const resize = faceapi.resizeResults(data, displaySize)
 			canvasRef.current.innerHTML = faceapi.createCanvasFromMedia(streamRef.current)
 			faceapi.draw.drawDetections(canvasRef.current, resize)
-			faceapi.draw.drawFaceExpressions(canvasRef.current, resize)
-		},100)
+			faceapi.draw.drawFaceExpressions(canvasRef.current,resize)
+		},50)
 	}
 	const startVideo = () => {
 		navigator.mediaDevices.getUserMedia({video: true}) 
@@ -67,13 +70,13 @@ const Webcamtsx = () => {
   return (
     <div className="w-full">
       {!modelLoading && (<>
-				<video className="mx-auto mt-20" ref={streamRef} autoPlay  muted width="700px"  onPlay={liveFaceDetection} />
+				<video className="mx-auto mt-12" ref={streamRef} autoPlay  muted width="600px"  onPlay={liveFaceDetection} />
 				{/* <img className="mx-auto mt-[5.8rem]" ref={webcamRef} crossOrigin="anonymous"
 				src="https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?size=626&ext=jpg" width={500} /> */}
 		</>	)}
       <canvas
         ref={canvasRef}
-        className="w-[700px] h-[393px] z-20 absolute inset-0 m-auto"
+        className="w-[600px] h-[450px] z-20 absolute inset-0 m-auto"
       />
     </div>
   );
