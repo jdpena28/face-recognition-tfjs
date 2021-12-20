@@ -5,6 +5,7 @@ import * as faceapi from "face-api.js"
 const Webcamtsx = () => {
   const [modelLoading, setModelLoading] = useState<boolean>(true);
   const webcamRef = useRef<any|null>()
+	const streamRef = useRef<any|null>()
   const canvasRef = useRef<any|null>()
 
   useEffect(() => {
@@ -17,12 +18,13 @@ const Webcamtsx = () => {
       ]).then(() => {
         setModelLoading(false)
       }).then(() => {
-				faceDetection()
+				// faceDetection()
+				startVideo()
 			})
     }
     loadModels();
   }, [])
-	const faceDetection = async () => {
+/* 	const faceDetection = async () => {
 		// console.log(webcamRef.current.stream.active)
 		const displaySize = {
 			width: webcamRef.current.width,
@@ -35,19 +37,43 @@ const Webcamtsx = () => {
 		canvasRef.current.innerHTML = faceapi.createCanvasFromMedia(webcamRef.current)
 		faceapi.draw.drawDetections(canvasRef.current, resize)
 		faceapi.draw.drawFaceExpressions(canvasRef.current, resize)
+	} */
+
+	
+
+	const liveFaceDetection = async () => {
+		console.log(streamRef.current.props.width)
+		const displaySize ={
+			width: streamRef.current.width,
+			height: streamRef.current.height
+		}
+		faceapi.matchDimensions(canvasRef.current, displaySize)
+		setInterval(async () => {
+			const data:any = await faceapi.detectSingleFace(streamRef.current, 
+			new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+			const resize = faceapi.resizeResults(data, displaySize)
+			canvasRef.current.innerHTML = faceapi.createCanvasFromMedia(streamRef.current)
+			faceapi.draw.drawDetections(canvasRef.current, resize)
+			faceapi.draw.drawFaceExpressions(canvasRef.current, resize)
+		},100)
+	}
+	const startVideo = () => {
+		navigator.mediaDevices.getUserMedia({video: true}) 
+		.then((stream:any) => {
+			streamRef.current.srcObject = stream
+			streamRef.current.play()
+		})
 	}
   return (
     <div className="w-full">
-      {!modelLoading && (
-				/* <Webcam className="m-auto mt-[5.8rem]" ref={webcamRef} 
-				audio={false} mirrored={true} height={500} width={500} 
-				onUserMedia={faceDetection} /> */
-				<img className="mx-auto mt-[5.8rem]" ref={webcamRef} crossOrigin="anonymous"
-				src="https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?size=626&ext=jpg" width={500} />
-			)}
+      {!modelLoading && (<>
+				<video className="mx-auto mt-20" ref={streamRef} autoPlay  muted width="700px"  onPlay={liveFaceDetection} />
+				{/* <img className="mx-auto mt-[5.8rem]" ref={webcamRef} crossOrigin="anonymous"
+				src="https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?size=626&ext=jpg" width={500} /> */}
+		</>	)}
       <canvas
         ref={canvasRef}
-        className="w-[500px] h-[374px] z-20  absolute inset-0 m-auto"
+        className="w-[700px] h-[393px] z-20 absolute inset-0 m-auto"
       />
     </div>
   );
