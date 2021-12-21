@@ -6,7 +6,7 @@ import { createCanvasFromMedia } from "face-api.js";
 const Webcamtsx = () => {
   const [modelLoading, setModelLoading] = useState<boolean>(true);
   const webcamRef = useRef<any|null>()
-	const streamRef = useRef<any|null>()
+  const streamRef = useRef<any|null>()
   const canvasRef = useRef<any|null>()
 
   useEffect(() => {
@@ -39,7 +39,6 @@ const Webcamtsx = () => {
 		faceapi.draw.drawDetections(canvasRef.current, resize)
 		faceapi.draw.drawFaceExpressions(canvasRef.current, resize)
 	} */
-
 	
 
 	const liveFaceDetection = async () => {
@@ -49,16 +48,16 @@ const Webcamtsx = () => {
 		}
 		faceapi.matchDimensions(canvasRef.current, displaySize)
 		setInterval(async () => {
-			const context = canvasRef.current.getContext('2d');
-      context.clearRect(0, 0, displaySize.width, displaySize.height);
-			canvasRef.current.innerHTML = createCanvasFromMedia(streamRef.current)
+		const context = canvasRef.current.getContext('2d');
+        context.clearRect(0,0,canvasRef.current.width, canvasRef.current.height);
+		canvasRef.current.innerHTML = createCanvasFromMedia(streamRef.current)
 			const data:any = await faceapi.detectSingleFace(streamRef.current, 
 			new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
 			const resize = faceapi.resizeResults(data, displaySize)
 			canvasRef.current.innerHTML = faceapi.createCanvasFromMedia(streamRef.current)
 			faceapi.draw.drawDetections(canvasRef.current, resize)
-			faceapi.draw.drawFaceExpressions(canvasRef.current,resize)
-		},50)
+			faceapi.draw.drawFaceExpressions(canvasRef.current, resize)
+		},100)
 	}
 	const startVideo = () => {
 		navigator.mediaDevices.getUserMedia({video: true}) 
@@ -70,7 +69,7 @@ const Webcamtsx = () => {
   return (
     <div className="w-full">
       {!modelLoading && (<>
-				<video className="mx-auto mt-12" ref={streamRef} autoPlay  muted width="600px"  onPlay={liveFaceDetection} />
+				<video className="mx-auto mt-12 -scale-x-100" ref={streamRef} autoPlay  muted width="600px"  onPlay={liveFaceDetection} />
 				{/* <img className="mx-auto mt-[5.8rem]" ref={webcamRef} crossOrigin="anonymous"
 				src="https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?size=626&ext=jpg" width={500} /> */}
 		</>	)}
