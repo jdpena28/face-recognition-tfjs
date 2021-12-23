@@ -40,7 +40,6 @@ const Webcamtsx = () => {
 		faceapi.draw.drawFaceExpressions(canvasRef.current, resize)
 	} */
 	
-
 	const liveFaceDetection = async () => {
 		const displaySize ={
 			width: streamRef.current.width,
